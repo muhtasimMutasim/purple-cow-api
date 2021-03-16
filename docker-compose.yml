@@ -4,17 +4,19 @@ services:
   
   # MariaDB SQL server
   db:
-    image: jsurf/rpi-mariadb
+    container_name: "db"
     restart: always
     build: ./db
     ports:
-      - "3306:3306"
+      - "3305:3305"
     env_file:
       - .env
     volumes:
       - ./db/initdb.d:/docker-entrypoint-initdb.d
       - ./db/conf.d:/etc/mysql/conf.d
       - ./db/log/mysql:/var/log/mysql
+    networks:
+      - local-net
 
   # FastAPI REST API
   app:
@@ -28,5 +30,11 @@ services:
       - .env
     depends_on:
       - db
-    volumes:
-      - ./api
+    # volumes:
+    #   - ./api
+    networks:
+      - local-net
+
+networks:
+  local-net:
+    driver: bridge
