@@ -24,8 +24,9 @@ def test():
 
 
 
-@router.get("/items")
+# @router.get("/items")
 # @app.post("/vader/{data}")
+@app.get("/items")
 def query(data: str, request: Request):
     """
     Route to items

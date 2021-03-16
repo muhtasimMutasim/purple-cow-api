@@ -12,4 +12,4 @@ __pycache__/
 __pycache__/*.cpython-37.pyc
 
 # file only for raspberry pi.
-rpi_ip.py
+.env
