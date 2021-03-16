@@ -56,7 +56,14 @@ tdb = TinyDB("../db/dbfile.json")
 
 '''
 
-def insert_data():
+def insert_data(db_id, name, category, description):
+    '''
+        Inserted data will have different categories
+        1) Website
+        2) Person Of Interest
+        3) Organization
+        4) Location
+    '''
     
     tdb.insert()
 
