@@ -139,14 +139,13 @@ def insert_test_data():
     item3 = [ "FreeFood.com", "Website", "Website for free food in balitmore."]
     #0316-2021-17-2021
     item4 = [ "mdot", "Organization", "Maryland department of transportation."]
-    # 
-    item5 = [ "deleting", "Test", "This is to test deleting"]
-    #
-    item6 = [ "Updating", "Test", "This is to test Updating"]
-    #
-    item7 = [ "CHECK-Existence", "Test", "Check to see what db returns when a value does not exist"]
-    
-    test_data = [ item1, item2, item3, item4, item5, item6, item7 ]
+    # item5 = [ "deleting", "Test", "This is to test deleting"]
+    # item6 = [ "Updating", "Test", "This is to test Updating"]
+    # item7 = [ "CHECK-Existence", "Test", "Check to see what db returns when a value does not exist"]
+    tdb.insert( {'id': '0317-2021-00-5205-517-058', 'name': 'deleting', 'category': 'Test', 'description': 'This is to test deleting'} )
+    tdb.insert( {'id': '0317-2021-00-5205-948-924', 'name': 'Updating', 'category': 'Test', 'description': 'This is to test Updating'})
+    tdb.insert({'id': '0317-2021-00-5205-578-135', 'name': 'CHECK-Existence', 'category': 'Test', 'description': 'Check to see what db returns when a value does not exist'})
+    test_data = [ item1, item2, item3, item4 ]
     # test_data = [ item1, item2, item3, item4, item5, item6 ]
     
     for data in test_data:
@@ -182,11 +181,12 @@ def test_delete():
 def test_update():
     
     c1 = "id"
-    id = "0316-2021-22-1252"
+    id = "0317-2021-00-5205-948-924"
     updated_data = {'name': 'Updated', 'description': 'This is testing the update functionality, and it worked'}
     
     # update_item( choice, identifier, updated_data )
     update_item( c1, id, updated_data )
+
 
 
 
@@ -199,10 +199,10 @@ def main():
     # get_item_test()
     
     # test_delete()
-    # test_update()
+    test_update()
     
-    for i in show_all():
-        print(i)
+    # for i in show_all():
+    #     print(i)
     
     
     

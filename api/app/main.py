@@ -21,15 +21,18 @@
 
 
 
+import json
+import os.path
+from os import path
 import sys
 import os
+
 from fastapi import FastAPI, APIRouter, Request
 from tinydb import TinyDB, Query, JSONStorage, Storage
 from tinydb.storages import MemoryStorage
 from datetime import datetime
+import random
 
-import os.path
-from os import path
 
 app = FastAPI()
 # router = APIRouter()
@@ -93,6 +96,7 @@ def insert_new_item( name, category, description):
     '''
     # Unique ID being 
     uid = datetime.now().strftime('%m%d-%Y-%H-%M%S')
+    uid = uid + "-" + '-'.join([str(random.randint(0, 999)).zfill(3) for _ in range(2)])
 
     # Creates Dictionary with relevant data
     item = { "id": uid, "name": name, "category": category, "description": description }
@@ -130,9 +134,17 @@ def update_item( choice, identifier, updated_data ):
         print( f"Item {identifier} Does not exist\n" )
         return False
     
+    
+    updated_data = updated_data.replace("'", '"', 30)
     # Uses timestamp id to get doc_id. 
     uid = target[0]['id']
-    print( f"\nTarget item Unique ID: {uid} that will be updated with \n{updated_data}\n" )
+    print( f"\nTarget item Unique ID: {uid} that will be updated with " )
+    print(updated_data)
+    print("\n\n")
+    
+    updated_data = json.loads(updated_data)
+    # d_t = type( updated_data )
+    # print( f"\nUpdated data type \n{ d_t }\n" )
     
     # Uses Database Index to update item
     item = tdb.get(query.id == uid )
@@ -141,10 +153,13 @@ def update_item( choice, identifier, updated_data ):
     print( f"Target item database ID: {db_id} that will be updated\n\n" )
     
     # Item Updated
-    tdb.update( updated_data, doc_ids=[ db_id ] )
+    tdb.update( updated_data, doc_ids=[db_id] )
+    
+    print( "Item Successfully Updated" )
     
     # Returns Updated Item
-    return get_item( "id", uid )  
+    # return get_item( "id", uid )  
+    return True  
     
 
 
@@ -208,7 +223,7 @@ def insert( request: Request, name: str, category: str, description: str ):
 
 
 @app.post("/item/update/{choice}/{identifier}/{updated_data}")
-def update( request: Request, name: str, identifier: str, updated_data: str ):
+def update( request: Request, choice: str, identifier: str, updated_data: str ):
     """
     Route to update an item. 
     Route needs choice of identifier ( like id or name).
@@ -217,8 +232,14 @@ def update( request: Request, name: str, identifier: str, updated_data: str ):
     
     client_host = request.client.host
     print( f"\n\nUpdate ENDPOINT\nGetting request from: {client_host}\n\n" )
+    print( f"RESPONSE: {choice}\n{identifier}\n{updated_data}\n\n" )
+    # print( f"Request JSON:\n{request.json()}\n\n" )
+    
+    # updated_data = json.loads(updated_data)
     
     message = update_item( choice, identifier, updated_data )
+    
+    print( f"\n\nMesage: {message}\n\n" )
     
     
     return { "data": message }
@@ -246,7 +267,7 @@ def delete( request: Request, choice: str, identifier: str ):
 
 
 @app.post("/item/get/{choice}/{identifier}")
-def get_item_( request: Request, name: str, identifier: str ):
+def get_item_( request: Request, choice: str, identifier: str ):
     """
     Route to delete an item. 
     Route needs choice of identifier ( like id or name) and identifier.
@@ -257,13 +278,9 @@ def get_item_( request: Request, name: str, identifier: str ):
     print( f"\n\Get Item ENDPOINT\nGetting request from: {client_host}\n\n" )
     
     message = get_item( choice, identifier )
+    print( f"\n\nIten Gotten:\n{message}\n\n" )
     
     return { "data": message }
-
-
-
-
-
 
 
 
@@ -306,14 +323,13 @@ def insert_test_data():
     item3 = [ "FreeFood.com", "Website", "Website for free food in balitmore."]
     #0316-2021-17-2021
     item4 = [ "mdot", "Organization", "Maryland department of transportation."]
-    # 
-    item5 = [ "deleting", "Test", "This is to test deleting"]
-    #
-    item6 = [ "Updating", "Test", "This is to test Updating"]
-    #
-    item7 = [ "CHECK-Existence", "Test", "Check to see what db returns when a value does not exist"]
-    
-    test_data = [ item1, item2, item3, item4, item5, item6, item7 ]
+    # item5 = [ "deleting", "Test", "This is to test deleting"]
+    # item6 = [ "Updating", "Test", "This is to test Updating"]
+    # item7 = [ "CHECK-Existence", "Test", "Check to see what db returns when a value does not exist"]
+    tdb.insert( {'id': '0317-2021-00-5205-517-058', 'name': 'deleting', 'category': 'Test', 'description': 'This is to test deleting'} )
+    tdb.insert( {'id': '0317-2021-00-5205-948-924', 'name': 'Updating', 'category': 'Test', 'description': 'This is to test Updating'})
+    tdb.insert({'id': '0317-2021-00-5205-578-135', 'name': 'CHECK-Existence', 'category': 'Test', 'description': 'Check to see what db returns when a value does not exist'})
+    test_data = [ item1, item2, item3, item4 ]
     # test_data = [ item1, item2, item3, item4, item5, item6 ]
     
     for data in test_data:
