@@ -32,7 +32,12 @@ from os import path
 app = FastAPI()
 # router = APIRouter()
 
-# @router.get("/test")
+
+
+###############################################################
+# Testing endpoints
+###############################################################
+
 @app.get("/test")
 def test():
     
@@ -58,7 +63,13 @@ def db_test():
     return {"DB Existence Test": existence }
 
 
+###############################################################
 
+
+
+################################################################
+# API logic
+###############################################################
 #  File Based database
 # tdb = TinyDB('../../db/db.json')
 
@@ -67,9 +78,11 @@ tdb = TinyDB(storage=MemoryStorage)
 query = Query()
 
 
-# Function to Insert a new item
+
+
 def insert_new_item( name, category, description):
     '''
+        Function to Insert a new item.
         Inserted data will have different categories
         1) Website
         2) Person Of Interest
@@ -86,10 +99,10 @@ def insert_new_item( name, category, description):
     tdb.insert( item )
 
 
-# Function to Get the Item by ID or name
+
 def get_item( choice, identifier ):
     '''
-        Function is to get an item that exists by choice ( id or name ) and identifier 
+        Function is to get an item that exists by choice ( id or name ) and identifier. 
     '''
     # Unique ID being 
     
@@ -101,58 +114,79 @@ def get_item( choice, identifier ):
         
         return tdb.search( query.name == identifier )
     
-# Update Existing Item with updated data in dictionary format
+
+
 def update_item( choice, identifier, updated_data ):
     
+    '''
+         Update Existing Item with updated data in dictionary format.
+    '''
     target = get_item( choice, identifier )
-            
+    
+    # Checks if item requested exists  
     if len(target) == 0:
         print( f"Item {identifier} Does not exist\n" )
         return False
     
+    # Uses timestamp id to get doc_id. 
     uid = target[0]['id']
     print( f"\nTarget item Unique ID: {uid} that will be updated with \n{updated_data}\n" )
     
+    # Uses Database Index to update item
     item = tdb.get(query.id == uid )
     db_id = item.doc_id
     
     print( f"Target item database ID: {db_id} that will be updated\n\n" )
     
-    tdb.update( updated_data, doc_ids=[ db_id ] )  
+    # Item Updated
+    tdb.update( updated_data, doc_ids=[ db_id ] )
+    
+    # Returns Updated Item
+    return get_item( "id", uid )  
     
 
 
-# Delete Existing Item
+
 def delete_item( choice, identifier ):
     
+    '''
+            Function for deleting Existing Item
+    '''
     target = get_item( choice, identifier )
-            
+    
+    # Checks if item requested exists  
     if len(target) == 0:
         print( f"Item {identifier} Does not exist\n" )
         return False
     
+    # Uses timestamp id to get doc_id. 
     uid = target[0]['id']
     print( f"Target item {uid} that will be deleted\n" )
     
+    # Uses Database Index to delete item
     item = tdb.get(query.id == uid )
     db_id = item.doc_id
     
     print( f"Target item db ID {db_id} that will be deleted\n" )
     
     tdb.remove( doc_ids=[ db_id ] )
+    return True
     
 
 
-# Function to show all items with associated data
 def show_all():
-
+    """
+        Shows All existing entries, If any exist
+    """
     return tdb.all()
 
 
+###############################################################
+##   All of the API endpoints
+############################################################### 
 
 
-# @router.get("/items")
-# @app.post("/vader/{data}")
+
 @app.post("/item/insert/{name}/{category}/{description}")
 def insert( request: Request, name: str, category: str, description: str ):
     """
@@ -163,31 +197,142 @@ def insert( request: Request, name: str, category: str, description: str ):
     
     print( f"\n\nGetting request from: {client_host}\n\n" )
     
-    message = "This will contain links with information FAST API FROM DOCKER"
+    insert_new_item( name, category, description)
+    message = "Data Has Succesfully been stored"
         
-    # return { "data": vader_result }
     return { "data": message }
 
 
 
 
-# @router.get("/items")
-# @app.post("/vader/{data}")
-@app.get("/item/show/{choice}")
-def query(request: Request):
+@app.post("/item/update/{choice}/{identifier}/{updated_data}")
+def update( request: Request, name: str, identifier: str, updated_data: str ):
     """
-    Route to items
+    Route to update an item. 
+    Route needs choice of identifier ( like id or name).
+    Route needs Updated Data in JSON form.
+    """
+    
+    client_host = request.client.host
+    print( f"\n\nUpdate ENDPOINT\nGetting request from: {client_host}\n\n" )
+    
+    message = update_item( choice, identifier, updated_data )
+    
+    
+    return { "data": message }
+
+
+
+
+
+@app.post("/item/delete/{choice}/{identifier}")
+def delete( request: Request, choice: str, identifier: str ):
+    """
+    Route to delete an item. 
+    Route needs choice of identifier ( like id or name) and identifier.
+
+    """
+    
+    client_host = request.client.host
+    print( f"\n\Delete ENDPOINT\nGetting request from: {client_host}\n\n" )
+    
+    message = delete_item( choice, identifier )
+    
+    return { "data": message }
+
+
+
+
+@app.post("/item/get/{choice}/{identifier}")
+def get_item_( request: Request, name: str, identifier: str ):
+    """
+    Route to delete an item. 
+    Route needs choice of identifier ( like id or name) and identifier.
+
+    """
+    
+    client_host = request.client.host
+    print( f"\n\Get Item ENDPOINT\nGetting request from: {client_host}\n\n" )
+    
+    message = get_item( choice, identifier )
+    
+    return { "data": message }
+
+
+
+
+
+
+
+
+@app.get("/item")
+def all_items(request: Request):
+    """
+    Route to show existing items.
     """
     # print(f"\n\nRESPONSE: {data}\n\n")
     # return {"client_host": client_host, "response": a}
     client_host = request.client.host
     
-    print( f"\n\nGetting request from: {client_host}\n\n" )
+    print( f"\n\nitem ENDPOINT for Show ALL\nGetting request from: {client_host}\n\n" )
     
-    message = "This will contain links with information FAST API FROM DOCKER"
+    message = show_all()
+    
+    if len(message) == 0:
+        
+        return {"data": "Database is currently empyt. send request to /insert-test-data endpoint for test data"}
         
     # return { "data": vader_result }
-    return { "data": message }
+    return { "data": show_all() }
 
 
+
+@app.get("/insert-test-data")
+def insert_test_data():
+    
+    """
+        This End Point is to insert test data
+    """
+
+    print( "Inside Test Data Function" )
+    
+    #0316-2021-17-1016 & 0316-2021-17-2007
+    item1 = [ "Legal Assistance, LLC", "Organization", "This law firm offered to take pro bono cases in balitmore."]
+    #0316-2021-17-2905
+    item2 = ["Bail Bonds", "Organization", "Bail bond help."]
+    #0316-2021-17-2014
+    item3 = [ "FreeFood.com", "Website", "Website for free food in balitmore."]
+    #0316-2021-17-2021
+    item4 = [ "mdot", "Organization", "Maryland department of transportation."]
+    # 
+    item5 = [ "deleting", "Test", "This is to test deleting"]
+    #
+    item6 = [ "Updating", "Test", "This is to test Updating"]
+    #
+    item7 = [ "CHECK-Existence", "Test", "Check to see what db returns when a value does not exist"]
+    
+    test_data = [ item1, item2, item3, item4, item5, item6, item7 ]
+    # test_data = [ item1, item2, item3, item4, item5, item6 ]
+    
+    for data in test_data:
+        
+        item = data
+    
+        name = item[0]
+        category = item[1]
+        description = item[2]
+        
+        # uid = get_item( "name", name)[0]['id']
+        exists = get_item( "name", name)
+        
+        if len(exists) == 0:
+            print( f"Does not exist {name}, entering data\n" )
+            insert_new_item( name, category, description)
+            continue
+                    
+        print( f"\nEXISTS: {exists} \n" )
+
+        # insert_new_item( name, category, description)
+    
+    return { "message": "Test Data Exists in Database" }
 
