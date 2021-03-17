@@ -25,6 +25,8 @@ import sys
 import os
 from fastapi import FastAPI, APIRouter, Request
 from tinydb import TinyDB, Query, JSONStorage, Storage
+from tinydb.storages import MemoryStorage
+from datetime import datetime
 
 import os.path
 from os import path
@@ -56,9 +58,9 @@ def db_test():
     """
         This checks if the tiny db file exists
     """
-    existence = path.exists("../db/dbfile.json")
+    existence = path.exists("../db/db.json")
     if existence != True:
-        open('../db/dbfile.json', 'w+')
+        open('../db/db.json', 'w+')
         
     return {"DB Existence Test": existence }
 
