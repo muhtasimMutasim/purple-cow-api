@@ -84,6 +84,8 @@
 
         In the test directory there is a python script called "test.py" that has functions that and test cases to check if everything on the REST api is 
         working and returning properly.
+        
+        Some of the tests are commented out so they aren't overused. 
 
 
         usage example:
@@ -94,6 +96,5 @@
 
          usage of custom_mesaage():
 
-            python test.py {Ip address} {Port Number} "Insert desired message you want to send"
-
-            python test.py 0.0.0.0 5050 "This movie is not very good."
+            python test.py {Ip address} {Port Number}
+            python test.py 0.0.0.0 5050 
