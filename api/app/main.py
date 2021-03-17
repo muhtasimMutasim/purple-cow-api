@@ -5,21 +5,6 @@
         
 """
 
-'''
-1. Web application API that is served on port 3000 
-2. The API includes one endpoint `/item` that allows a client to retrieve the current items, set the items, and delete the items 
-3. The “Item” object should have two properties: id and name 
-
-4. Items should be persisted in memory while the application is running 
-5. Includes a Dockerfile that will run and serve the web application 
-
-6. Runs locally with a single startup command 
-
-7. Includes a solution.md that provides relevant documentation including system requirements and how to build/run the solution 
-
-'''
-
-
 
 import json
 import os.path
